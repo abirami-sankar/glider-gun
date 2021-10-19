@@ -148,5 +148,7 @@ function checkNeighbors(arr, x, y, z) {
         sum += arr[z][y][x + k]
     }
 
+    sum = sum - (3*arr[z][y][x])
+
     return sum
 }
