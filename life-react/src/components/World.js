@@ -1,0 +1,204 @@
+import React from "react";
+import * as THREE from "three";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import * as dat from 'three/examples/jsm/libs/dat.gui.module';
+
+class World extends React.Component {
+    constructor(props) {
+        super(props);
+
+        // making the boolean array a state variable cause it is the basic thing 
+        // that the world needs
+        this.state = {
+            cubeIndex: []
+        }
+
+        // binding a bunch of methods to better access the three.js scene
+        // including the standard animate function in three.js which is bound
+        // to class since we cant access this.scene in outside function (private)
+        this.start = this.start.bind(this);
+        this.drawAxes = this.drawAxes.bind(this);
+        this.drawCubes = this.drawCubes.bind(this);
+        this.resetWorld = this.resetWorld.bind(this);
+        this.clearScene = this.clearScene.bind(this);
+        this.animate = this.animate.bind(this);
+    }
+
+    componentDidMount() {
+        // setting up the three.js script portion
+
+        // initialise scene
+        const scene = new THREE.Scene();
+
+        // adding GUI incase we need to debug something later
+        const gui = new dat.GUI();
+
+        // co-ordinate axis just to provide some reference
+        const line_material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+        this.drawAxes(scene, line_material);
+
+        // initialising the boolean 3d array and adding cubes to scene based on it
+        // draw is probably not the best name here
+        const arr = make3DArray();
+        this.setState({cubeIndex: arr});
+        this.drawCubes(scene, arr);
+
+        // camera
+        const camera = new THREE.PerspectiveCamera( 75, 
+            window.innerWidth / window.innerHeight, 
+            0.1, 1000 
+        ); 
+
+        // need to add basic lighting
+
+        // renderer
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setClearColor('#303030');
+
+        // setting up orbit controller
+        // set camera position and then update orbit control 
+        // control needs to be updated after each manual camera change
+        const controls = new OrbitControls( camera, renderer.domElement );
+        camera.position.z = 25;
+        controls.update();
+        
+        // adding everythin we have so far into the class
+        this.scene = scene
+        this.camera = camera
+        this.controls = controls
+        this.renderer = renderer
+
+        this.mount.appendChild( renderer.domElement );
+        this.start();
+    }
+    
+    start() {
+        if (!this.frameId) {
+          this.frameId = requestAnimationFrame(this.animate)
+        }
+    }
+
+    drawAxes(scene, material) {
+        const pointsX = [];
+        pointsX.push(new THREE.Vector3(-100, 0, 0));
+        pointsX.push(new THREE.Vector3(0, 0, 0));
+        pointsX.push(new THREE.Vector3(100, 0, 0));
+
+        const geometryX = new THREE.BufferGeometry().setFromPoints(pointsX);
+        const lineX = new THREE.Line(geometryX, material);
+        scene.add(lineX);
+
+        const pointsY = [];
+        pointsY.push(new THREE.Vector3(0, -100, 0));
+        pointsY.push(new THREE.Vector3(0, 0, 0));
+        pointsY.push(new THREE.Vector3(0, 100, 0));
+
+        const geometryY = new THREE.BufferGeometry().setFromPoints(pointsY);
+        const lineY = new THREE.Line(geometryY, material);
+        scene.add(lineY);
+    }
+
+    drawCubes(scene, cube_index){
+        const geometry = new THREE.BoxGeometry(1,1,1);
+        const material = new THREE.MeshStandardMaterial( { color: 0xfcfcfc } );
+        material.roughness = 0;
+    
+        const n = 50;
+        let cubes = 0;
+    
+        for(let i = 0; i < 5; i++){
+            for(let j = 0; j < 5; j++){
+                for(let k = 0; k < 5; k++){
+                    if (cube_index[i][j][k] === 1 && cubes < n) {
+                        const cube = new THREE.Mesh( geometry, material );
+                        cube.position.set(i,j,k);
+                        cube.is_ob = true;
+                        scene.add( cube );
+                        cubes++;
+                    }
+                }
+            }
+        }
+    }
+
+    resetWorld() {
+        this.clearScene();
+
+        const newWorld = make3DArray();
+        this.setState({cubeIndex: newWorld});
+
+        this.drawCubes(this.scene, this.state.cubeIndex);
+    }
+
+    clearScene() {
+        // iterates over each objet every frame and clears them
+        // not the most efficient methif right?
+        let obj, i;
+        for (i = this.scene.children.length - 1; i >= 0 ; i --) {
+            obj = this.scene.children[ i ];
+            if (obj.is_ob) {
+                this.scene.remove(obj); 
+            }
+        }
+    }
+    
+    animate() {   
+        this.controls.update(); 
+        this.renderer.render(this.scene, this.camera)
+        this.frameId = window.requestAnimationFrame(this.animate)
+    }
+    
+    render() {
+        return (
+            // the button has to be specifically styled to make it render 
+            // over the three.js scene
+            <div>
+                <div ref={ref => (this.mount = ref)} />
+                <button id = "reset" onClick={this.resetWorld}>Reset World</button>
+                <button id = "start" onClick={this.start}>Start</button>
+            </div>
+        );
+    }
+}
+
+//helper
+
+// 1. generate initial 3d array
+function make3DArray() {
+    let arr = [];
+    for (let i = 0; i < 20; i++) {
+        arr.push([]);
+        for(let j = 0; j < 20; j++){
+            arr[i].push([]);
+            for(let k = 0; k < 5; k++){
+                arr[i][j].push(Math.floor(Math.random() * 4));
+            }
+        }
+    }
+    return arr;
+}
+
+// 2. calculate neuman neighbor for each cell 
+// using neuman here just to reduce the amount of calcualtions for each cell
+// moore will have 26 neighbors while neuman will have just 6
+function checkNeighbors(arr, x, y, z) {
+    let sum = 0
+
+    for (let i = -1; i < 2; i++){
+        sum += arr[z + i][y][x]
+    }
+    for (let j = -1; j < 2; j++){
+        sum += arr[z][y + j][x]
+    }
+    for (let k = -1; k < 2; k++){
+        sum += arr[z][y][x + k]
+    }
+
+    sum = sum - (3*arr[z][y][x])
+
+    return sum
+}
+
+
+export default World;
