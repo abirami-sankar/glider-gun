@@ -169,7 +169,7 @@ class World extends React.Component {
                     const neighbors = checkNeighborsM(this.cubeIndex, k, j, i)
                     //console.log("neighbors: ", neighbors)
 
-                    if (cell === 0) {
+                    if (cell.state === 0) {
                         if (neighbors === 3) {
                             newGen[i][j][k] = 1
                         }
@@ -286,18 +286,18 @@ function checkNeighborsN(arr, x, y, z) {
 
     for (let i = -1; i < 2; i++){
         //console.log("for 1: x=", z+i, ", y=", y, ", z=", x)
-        sum += arr[z + i][y][x]
+        sum += arr[z + i][y][x].state
     }
     for (let j = -1; j < 2; j++){
        // console.log("for 1: x=", z, ", y=", y+j, ", z=", x)
-        sum += arr[z][y + j][x]
+        sum += arr[z][y + j][x].state
     }
     for (let k = -1; k < 2; k++){
         //console.log("for 1: x=", z, ", y=", y, ", z=", x+k)
-        sum += arr[z][y][x + k]
+        sum += arr[z][y][x + k].state
     }
 
-    sum = sum - (3*arr[z][y][x])
+    sum = sum - (3*arr[z][y][x].state)
 
     return sum
 }
