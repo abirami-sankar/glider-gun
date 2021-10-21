@@ -12,20 +12,28 @@ code {
     monospace;
 }
 
-button {
+button, input, select, option {
   position: absolute;
   display: block;
   z-index: 99;
+}
+
+#rulesets {
   left: 5%;
-  top: 10%;
+  top: 5%;
+}
+
+#density {
+  left: 5%;
+  top: 8%
 }
 
 #start {
   left: 5%;
-  top: 10%;
+  top: 12%;
 }
 
 #reset {
   left: 5%;
-  top: 15%;
+  top: 20%;
 }

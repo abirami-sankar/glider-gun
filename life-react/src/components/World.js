@@ -3,6 +3,9 @@ import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import * as dat from 'three/examples/jsm/libs/dat.gui.module';
 
+const size = 50;
+const density = 1000;
+
 class World extends React.Component {
     constructor(props) {
         super(props);
@@ -14,7 +17,7 @@ class World extends React.Component {
         this.drawAxes = this.drawAxes.bind(this);
         this.drawCubes = this.drawCubes.bind(this);
         this.nextGeneration = this.nextGeneration.bind(this);
-        this.populateWorld = this.nextGeneration.bind(this);
+        this.populateWorld = this.populateWorld.bind(this);
         this.resetWorld = this.resetWorld.bind(this);
         this.clearScene = this.clearScene.bind(this);
         this.animate = this.animate.bind(this);
@@ -32,7 +35,7 @@ class World extends React.Component {
 
         // co-ordinate axis just to provide some reference
         const line_material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-        this.drawAxes(line_material);
+       // this.drawAxes(line_material);
 
         // initialising the boolean 3d array and adding cubes to scene based on it
         // draw is probably not the best name here
@@ -47,6 +50,23 @@ class World extends React.Component {
         ); 
 
         // need to add basic lighting
+        const light1 = new THREE.AmbientLight( 0x404040 ); // soft white light
+        this.scene.add( light1 );
+
+        const light2 = new THREE.PointLight( 0xff0000, 1, 100 ); 
+        light2.position.set(10,50,0);
+        this.scene.add( light2 );
+
+        const light3 = new THREE.PointLight( 0x0000ff, 1, 100 ); 
+        light3.position.set(50,50,50);
+        this.scene.add( light3 );
+
+        // adding gui for light to set position
+        const lightFolder = gui.addFolder('Red Light')
+        lightFolder.add(light2.position, 'z', 0, 200)
+        lightFolder.add(light2.position, 'y', 0, 200)
+        lightFolder.add(light2.position, 'x', 0, 200)
+        lightFolder.open()
 
         // renderer
         const renderer = new THREE.WebGLRenderer();
@@ -57,8 +77,15 @@ class World extends React.Component {
         // set camera position and then update orbit control 
         // control needs to be updated after each manual camera change
         const controls = new OrbitControls( camera, renderer.domElement );
-        camera.position.z = 25;
+        camera.position.set(100,50,75);
         controls.update();
+
+        // adding gui for camera to set position
+        const cameraFolder = gui.addFolder('Camera')
+        cameraFolder.add(camera.position, 'z', 0, 200)
+        cameraFolder.add(camera.position, 'y', 0, 200)
+        cameraFolder.add(camera.position, 'x', 0, 200)
+        cameraFolder.open()
         
         // adding everythin we have so far into the class
         this.camera = camera
@@ -97,21 +124,23 @@ class World extends React.Component {
 
     drawCubes(){
         const geometry = new THREE.BoxGeometry(1,1,1);
-        const material = new THREE.MeshStandardMaterial( { color: 0xfcfcfc } );
+        const material = new THREE.MeshStandardMaterial( { color: 0xff2399 } );
+        material.transparent = true;
+        material.opacity = 0.5;
         material.roughness = 0;
     
-        const n = 15;
-        let cubes = 0;
+        //const n = 15;
+        //let cubes = 0;
     
-        for(let i = 0; i < 5; i++){
-            for(let j = 0; j < 5; j++){
-                for(let k = 0; k < 5; k++){
-                    if (this.cubeIndex[i][j][k] === 1 && cubes < n) {
+        for(let i = 0; i < size; i++){
+            for(let j = 0; j < size; j++){
+                for(let k = 0; k < size; k++){
+                    if (this.cubeIndex[i][j][k] === 1) {
                         const cube = new THREE.Mesh( geometry, material );
                         cube.position.set(i,j,k);
                         cube.is_ob = true;
                         this.scene.add( cube );
-                        cubes++;
+                        //cubes++;
                     }
                 }
             }
@@ -122,11 +151,12 @@ class World extends React.Component {
         let newGen = this.cubeIndex;
         //console.log(newGen)
 
-        for(let i = 1; i < 4; i++){
-            for(let j = 1; j < 4; j++){
-                for(let k = 1; k < 4; k++){
+        for(let i = 1; i < size-1; i++){
+            for(let j = 1; j < size-1; j++){
+                for(let k = 1; k < size-1; k++){
                     const cell = this.cubeIndex[i][j][k]
-                    const neighbors = checkNeighbors(this.cubeIndex, k, j, i)
+                    const neighbors = checkNeighborsM(this.cubeIndex, k, j, i)
+                    //console.log("neighbors: ", neighbors)
 
                     if (cell === 0) {
                         if (neighbors === 3) {
@@ -135,7 +165,7 @@ class World extends React.Component {
                     } else {
                         if (neighbors === 3 || neighbors === 2) {
                             newGen[i][j][k] = 1
-                        } else if(neighbors > 3 || neighbors < 2) {
+                        } else if(neighbors >= 4 || neighbors <= 1) {
                             newGen[i][j][k] = 0 
                         }
                     }
@@ -143,7 +173,7 @@ class World extends React.Component {
             }
         }
 
-        console.log(newGen)
+        //console.log(newGen);
 
         this.cubeIndex = newGen;
         this.populateWorld();
@@ -157,10 +187,9 @@ class World extends React.Component {
     resetWorld() {
         this.clearScene();
 
-        const newWorld = make3DArray();
-        this.setState({cubeIndex: newWorld});
-
-        this.drawCubes(this.scene, this.state.cubeIndex);
+        this.cubeIndex = make3DArray();
+    
+        this.drawCubes();
     }
 
     clearScene() {
@@ -177,9 +206,9 @@ class World extends React.Component {
     
     animate() {   
         this.controls.update(); 
-        this.nextGeneration();
         this.renderer.render(this.scene, this.camera)
-        //this.frameId = window.requestAnimationFrame(this.animate)
+        this.nextGeneration();
+        this.frameId = window.requestAnimationFrame(() => setInterval(this.animate, 500))
     }
     
     render() {
@@ -187,9 +216,18 @@ class World extends React.Component {
             // the button has to be specifically styled to make it render 
             // over the three.js scene
             <div>
-                <div ref={ref => (this.mount = ref)} />
+                <div>
+                    <select id="rulesets" name="rulesets" defaultValue = "select">
+                        <option value="select" disabled>Select Ruleset</option>
+                        <option value="Moore">GOL- Moore neighborhood</option>
+                        <option value="Neumann">GOL- Neumann neighborhood</option>
+                    </select>
+
+                    <input id = "density" type="text" placeholder="Set Density" />
+                    <button id = "start" onClick={this.start}>Start</button>
+                </div>
                 <button id = "reset" onClick={this.resetWorld}>Reset World</button>
-                <button id = "start" onClick={this.start}>Start</button>
+                <div ref={ref => (this.mount = ref)} />
             </div>
         );
     }
@@ -200,12 +238,30 @@ class World extends React.Component {
 // 1. generate initial 3d array
 function make3DArray() {
     let arr = [];
-    for (let i = 0; i < 5; i++) {
+
+    let cubes = 0;
+
+    for (let i = 0; i < size; i++) {
         arr.push([]);
-        for(let j = 0; j < 5; j++){
+        for(let j = 0; j < size; j++){
             arr[i].push([]);
-            for(let k = 0; k < 5; k++){
-                arr[i][j].push(Math.floor(Math.random() + 0.5));
+            for(let k = 0; k < size; k++){
+                arr[i][j].push(0);
+                // console.log(arr[i][j][k])
+            }
+        }
+    }
+
+    for (let i = Math.floor(size/4); i < Math.floor(3*size/4); i++) {
+        for (let j = Math.floor(size/4); j < Math.floor(3*size/4); j++) {
+            for (let k = Math.floor(size/4); k < Math.floor(3*size/4); k++) {
+                arr[i][j][k] = Math.floor(Math.random() * 2) == 1 ? 1: 0;
+                if (arr[i][j][k] === 1) {
+                    cubes++;
+                    if (cubes > density) {
+                        arr[i][j][k] = 0;
+                    }
+                }
             }
         }
     }
@@ -215,7 +271,7 @@ function make3DArray() {
 // 2. calculate neuman neighbor for each cell 
 // using neuman here just to reduce the amount of calcualtions for each cell
 // moore will have 26 neighbors while neuman will have just 6
-function checkNeighbors(arr, x, y, z) {
+function checkNeighborsN(arr, x, y, z) {
     let sum = 0
 
     for (let i = -1; i < 2; i++){
@@ -236,5 +292,21 @@ function checkNeighbors(arr, x, y, z) {
     return sum
 }
 
+// 3. Calculate moore neighbours 
+function checkNeighborsM (arr, x,y,z) {
+    let sum = 0;
+
+    for (let i = -1; i<2; i++) {
+        for (let j = -1; j<2; j++) {
+            for (let k = -1; k<2; k++) {
+                sum += arr[z+i][y+j][x+k];
+            }
+        }
+    }
+
+    sum -= arr[z][y][x];
+
+    return sum
+}
 
 export default World;
