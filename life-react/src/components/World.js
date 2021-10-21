@@ -171,13 +171,13 @@ class World extends React.Component {
 
                     if (cell.state === 0) {
                         if (neighbors === 3) {
-                            newGen[i][j][k] = 1
+                            newGen[i][j][k].state = 1
                         }
                     } else {
                         if (neighbors === 3 || neighbors === 2) {
-                            newGen[i][j][k] = 1
+                            newGen[i][j][k].state = 1
                         } else if(neighbors >= 4 || neighbors <= 1) {
-                            newGen[i][j][k] = 0 
+                            newGen[i][j][k].state = 0 
                         }
                     }
                 }
