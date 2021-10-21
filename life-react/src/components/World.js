@@ -127,14 +127,14 @@ class World extends React.Component {
 
     generateCubes(){
         const geometry = new THREE.BoxGeometry(1,1,1);
-        const material = new THREE.MeshStandardMaterial( { color: 0xff2399 } );
-                    material.transparent = true;
-                    material.opacity = 0;
-                    material.roughness = 0;
         
         for(let i = 0; i < size; i++){
             for(let j = 0; j < size; j++){
                 for(let k = 0; k < size; k++){
+                    const material = new THREE.MeshStandardMaterial( { color: 0xff2399 } );
+                    material.transparent = true;
+                    material.opacity = 0;
+                    material.roughness = 0;
                     const cube = new THREE.Mesh( geometry, material );
                     cube.position.set(i,j,k);
                     cube.is_ob = true;
