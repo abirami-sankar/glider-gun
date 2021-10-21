@@ -309,12 +309,12 @@ function checkNeighborsM (arr, x,y,z) {
     for (let i = -1; i<2; i++) {
         for (let j = -1; j<2; j++) {
             for (let k = -1; k<2; k++) {
-                sum += arr[z+i][y+j][x+k];
+                sum += arr[z+i][y+j][x+k].state;
             }
         }
     }
 
-    sum -= arr[z][y][x];
+    sum -= arr[z][y][x].state;
 
     return sum
 }
