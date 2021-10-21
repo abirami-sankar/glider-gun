@@ -15,7 +15,8 @@ class World extends React.Component {
         // to class since we cant access this.scene in outside function (private)
         this.start = this.start.bind(this);
         this.drawAxes = this.drawAxes.bind(this);
-        this.drawCubes = this.drawCubes.bind(this);
+        this.generateCubes = this.generateCubes.bind(this);
+        this.updateCubes = this.updateCubes.bind(this);
         this.nextGeneration = this.nextGeneration.bind(this);
         this.populateWorld = this.populateWorld.bind(this);
         this.resetWorld = this.resetWorld.bind(this);
@@ -34,14 +35,12 @@ class World extends React.Component {
         const gui = new dat.GUI();
 
         // co-ordinate axis just to provide some reference
-        const line_material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+        //const line_material = new THREE.LineBasicMaterial({ color: 0x0000ff });
        // this.drawAxes(line_material);
 
-        // initialising the boolean 3d array and adding cubes to scene based on it
-        // draw is probably not the best name here
-        this.cubeIndex = make3DArray();
+       // add empty cubes to the scene
+        this.generateCubes();
         
-        this.drawCubes();
 
         // camera
         const camera = new THREE.PerspectiveCamera( 75, 
@@ -96,6 +95,10 @@ class World extends React.Component {
     }
     
     start() {
+        this.cubeIndex = make3DArray();
+        this.updateCubes();
+
+        // start the animation
         if (!this.frameId) {
           this.frameId = requestAnimationFrame(this.animate)
         }
@@ -122,25 +125,33 @@ class World extends React.Component {
         this.scene.add(lineY);
     }
 
-    drawCubes(){
+    generateCubes(){
         const geometry = new THREE.BoxGeometry(1,1,1);
         const material = new THREE.MeshStandardMaterial( { color: 0xff2399 } );
-        material.transparent = true;
-        material.opacity = 0.5;
-        material.roughness = 0;
-    
-        //const n = 15;
-        //let cubes = 0;
-    
+                    material.transparent = true;
+                    material.opacity = 0;
+                    material.roughness = 0;
+        
         for(let i = 0; i < size; i++){
             for(let j = 0; j < size; j++){
                 for(let k = 0; k < size; k++){
-                    if (this.cubeIndex[i][j][k] === 1) {
-                        const cube = new THREE.Mesh( geometry, material );
-                        cube.position.set(i,j,k);
-                        cube.is_ob = true;
-                        this.scene.add( cube );
-                        //cubes++;
+                    const cube = new THREE.Mesh( geometry, material );
+                    cube.position.set(i,j,k);
+                    cube.is_ob = true;
+                    this.scene.add( cube );
+                }
+            }
+        }
+    }
+
+    updateCubes(){   
+        for(let i = 0; i < size; i++){
+            for(let j = 0; j < size; j++){
+                for(let k = 0; k < size; k++){
+                    if (this.cubeIndex[i][j][k].state === 1) {
+                        const cube = this.scene.getObjectById(this.cubeIndex[i][j][k].id)
+                        console.log(cube);
+                        cube.material.opacity = 0.5;
                     }
                 }
             }
@@ -176,20 +187,17 @@ class World extends React.Component {
         //console.log(newGen);
 
         this.cubeIndex = newGen;
-        this.populateWorld();
+        this.updateCubes();
     }
 
     populateWorld() {
-        this.clearScene();
-        this.drawCubes();
+        this.updateCubes();
     }
 
     resetWorld() {
-        this.clearScene();
-
         this.cubeIndex = make3DArray();
     
-        this.drawCubes();
+        this.updateCubes();
     }
 
     clearScene() {
@@ -240,13 +248,15 @@ function make3DArray() {
     let arr = [];
 
     let cubes = 0;
+    let id = 1;
 
     for (let i = 0; i < size; i++) {
         arr.push([]);
         for(let j = 0; j < size; j++){
             arr[i].push([]);
             for(let k = 0; k < size; k++){
-                arr[i][j].push(0);
+                arr[i][j].push({state: 0, id: id});
+                id++;
                 // console.log(arr[i][j][k])
             }
         }
@@ -255,11 +265,11 @@ function make3DArray() {
     for (let i = Math.floor(size/4); i < Math.floor(3*size/4); i++) {
         for (let j = Math.floor(size/4); j < Math.floor(3*size/4); j++) {
             for (let k = Math.floor(size/4); k < Math.floor(3*size/4); k++) {
-                arr[i][j][k] = Math.floor(Math.random() * 2) == 1 ? 1: 0;
-                if (arr[i][j][k] === 1) {
+                arr[i][j][k].state = Math.floor(Math.random() * 2) == 1 ? 1: 0;
+                if (arr[i][j][k].state === 1) {
                     cubes++;
                     if (cubes > density) {
-                        arr[i][j][k] = 0;
+                        arr[i][j][k].state = 0;
                     }
                 }
             }
