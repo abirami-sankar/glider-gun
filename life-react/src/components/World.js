@@ -237,13 +237,11 @@ class World extends React.Component {
         this.controls.update(); 
         this.renderer.render(this.scene, this.camera)
         this.nextGeneration();
-        this.frameId = window.requestAnimationFrame(() => setInterval(this.animate, 500))
+        this.frameId = window.requestAnimationFrame(() => setInterval(this.animate, 1000))
     }
     
     render() {
         return (
-            // the button has to be specifically styled to make it render 
-            // over the three.js scene
             <div>
                 <div>
                     <select ref = {ref => (this.ruleRef = ref.value)} id="rulesets" name="rulesets" defaultValue = "select">

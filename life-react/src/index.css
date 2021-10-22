@@ -12,10 +12,36 @@ code {
     monospace;
 }
 
-button, input, select, option {
+input, select, option {
   position: absolute;
   display: block;
   z-index: 99;
+}
+
+button {
+  position: absolute;
+  display: block;
+  z-index: 99;
+
+  background-color:#008CBA;
+  color: white;
+
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+
+  transition-duration: 0.4s;
+}
+
+button:hover {
+  background-color: #085b7700;
+  border: 2px solid #008CBA;
+  color: white;
 }
 
 #rulesets {
