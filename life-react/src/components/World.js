@@ -3,8 +3,9 @@ import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import * as dat from 'three/examples/jsm/libs/dat.gui.module';
 
-const size = 50;
-const density = 1000;
+
+const size = 25;
+//const density = 1000;
 
 class World extends React.Component {
     constructor(props) {
@@ -25,6 +26,8 @@ class World extends React.Component {
 
         this.scene = new THREE.Scene();
         this.cubeIndex = [];
+        this.densityRef = 0;
+        this.ruleRef = '';
     }
 
     componentDidMount() {
@@ -93,9 +96,13 @@ class World extends React.Component {
 
         this.mount.appendChild( renderer.domElement );
     }
+
+    setup() {
+
+    }
     
     start() {
-        this.cubeIndex = make3DArray();
+        this.cubeIndex = make3DArray(this.densityRef);
         this.updateCubes();
 
         // start the animation
@@ -165,8 +172,22 @@ class World extends React.Component {
         for(let i = 1; i < size-1; i++){
             for(let j = 1; j < size-1; j++){
                 for(let k = 1; k < size-1; k++){
-                    const cell = this.cubeIndex[i][j][k]
-                    const neighbors = checkNeighborsM(this.cubeIndex, k, j, i)
+                    const cell = this.cubeIndex[i][j][k];
+
+                    // load in ruleset based on dropdown
+                    let neighbors
+                    switch(this.ruleRef){
+                        case "Moore":
+                            neighbors = checkNeighborsM(this.cubeIndex, k, j, i)
+                            break;
+                        case "Neumann":
+                            neighbors = checkNeighborsN(this.cubeIndex, k, j, i)
+                            break;
+                        default:
+                            neighbors = checkNeighborsM(this.cubeIndex, k, j, i)
+                            
+                    }
+                    
                     //console.log("neighbors: ", neighbors)
 
                     if (cell.state === 0) {
@@ -195,7 +216,7 @@ class World extends React.Component {
     }
 
     resetWorld() {
-        this.cubeIndex = make3DArray();
+        this.cubeIndex = make3DArray(this.densityRef);
     
         this.updateCubes();
     }
@@ -225,13 +246,13 @@ class World extends React.Component {
             // over the three.js scene
             <div>
                 <div>
-                    <select id="rulesets" name="rulesets" defaultValue = "select">
+                    <select ref = {ref => (this.ruleRef = ref.value)} id="rulesets" name="rulesets" defaultValue = "select">
                         <option value="select" disabled>Select Ruleset</option>
                         <option value="Moore">GOL- Moore neighborhood</option>
                         <option value="Neumann">GOL- Neumann neighborhood</option>
                     </select>
 
-                    <input id = "density" type="text" placeholder="Set Density" />
+                    <input ref = {ref => (this.densityRef = ref)} id = "density" type="number" placeholder="Set Density" />
                     <button id = "start" onClick={this.start}>Start</button>
                 </div>
                 <button id = "reset" onClick={this.resetWorld}>Reset World</button>
@@ -241,10 +262,10 @@ class World extends React.Component {
     }
 }
 
-//helper
+// helpers
 
 // 1. generate initial 3d array
-function make3DArray() {
+function make3DArray(density) {
     let arr = [];
 
     let cubes = 0;
@@ -257,7 +278,7 @@ function make3DArray() {
             for(let k = 0; k < size; k++){
                 arr[i][j].push({state: 0, id: id});
                 id++;
-                // console.log(arr[i][j][k])
+                //console.log(arr[i][j][k])
             }
         }
     }
@@ -265,7 +286,7 @@ function make3DArray() {
     for (let i = Math.floor(size/4); i < Math.floor(3*size/4); i++) {
         for (let j = Math.floor(size/4); j < Math.floor(3*size/4); j++) {
             for (let k = Math.floor(size/4); k < Math.floor(3*size/4); k++) {
-                arr[i][j][k].state = Math.floor(Math.random() * 2) == 1 ? 1: 0;
+                arr[i][j][k].state = Math.floor(Math.random() * 2) === 1 ? 1: 0;
                 if (arr[i][j][k].state === 1) {
                     cubes++;
                     if (cubes > density) {
