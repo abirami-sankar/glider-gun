@@ -1,11 +1,9 @@
 import React from "react";
+import { Link } from 'react-router-dom';
 import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import * as dat from 'three/examples/jsm/libs/dat.gui.module';
-
 
 const size = 45;
-//const density = 1000;
 
 class World extends React.Component {
     constructor(props) {
@@ -23,21 +21,13 @@ class World extends React.Component {
         this.animate = this.animate.bind(this);
 
         this.scene = new THREE.Scene();
+
+        // 3d array that keeps track of whether a cube is drawn at a particular index or not
         this.cubeIndex = [];
-        this.densityRef = 0;
-        this.ruleRef = '';
     }
 
     componentDidMount() {
         // setting up the three.js script portion
-
-
-        // adding GUI incase we need to debug something later
-        const gui = new dat.GUI();
-
-        // co-ordinate axis just to provide some reference
-        //const line_material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-       // this.drawAxes(line_material); 
 
         // camera
         const camera = new THREE.PerspectiveCamera( 75, 
@@ -45,7 +35,7 @@ class World extends React.Component {
             0.1, 1000 
         ); 
 
-        // need to add basic lighting
+        // adding basic lighting
         const light1 = new THREE.AmbientLight( 0x404040 ); // soft white light
         this.scene.add( light1 );
 
@@ -57,17 +47,11 @@ class World extends React.Component {
         light3.position.set(50,50,50);
         this.scene.add( light3 );
 
-        // adding gui for light to set position
-        const lightFolder = gui.addFolder('Red Light')
-        lightFolder.add(light2.position, 'z', 0, 200)
-        lightFolder.add(light2.position, 'y', 0, 200)
-        lightFolder.add(light2.position, 'x', 0, 200)
-        lightFolder.open()
-
+        
         // renderer
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize( window.innerWidth, window.innerHeight );
-        renderer.setClearColor('#303030');
+        renderer.setClearColor('#202124');
 
         // setting up orbit controller
         // set camera position and then update orbit control 
@@ -76,12 +60,6 @@ class World extends React.Component {
         camera.position.set(100,50,75);
         controls.update();
 
-        // adding gui for camera to set position
-        const cameraFolder = gui.addFolder('Camera')
-        cameraFolder.add(camera.position, 'z', 0, 200)
-        cameraFolder.add(camera.position, 'y', 0, 200)
-        cameraFolder.add(camera.position, 'x', 0, 200)
-        cameraFolder.open()
         
         // adding everythin we have so far into the class
         this.camera = camera
@@ -92,21 +70,17 @@ class World extends React.Component {
     }
     
     start() {
-        //this.cubeIndex = make3DArray(this.densityRef);
-        //this.updateCubes();
+        // executed when start-btn pressed
 
+        // initialises cube config to scene
         this.cubeIndex = make3DArray(this.densityRef.value);
         
         this.drawCubes();
-
-        console.log("density: ",this.densityRef.value)
-        console.log("rule: ",this.ruleRef.value)
 
         // start the animation
         if (!this.frameId) {
           this.frameId = requestAnimationFrame(this.animate)
         }
-        //this.nextGeneration();
     }
 
     drawCubes(){
@@ -132,8 +106,7 @@ class World extends React.Component {
 
     nextGeneration() {
         let newGen = this.cubeIndex;
-        //console.log(newGen)
-
+        
         for(let i = 1; i < size-1; i++){
             for(let j = 1; j < size-1; j++){
                 for(let k = 1; k < size-1; k++){
@@ -141,56 +114,57 @@ class World extends React.Component {
 
                     // load in ruleset based on dropdown
                     let neighbors
-                    switch(this.ruleRef.value){
-                        case "Moore":
-                            neighbors = checkNeighborsM(this.cubeIndex, k, j, i);
-                            if (cell.state === 0) {
-                                if (neighbors === 5) {
-                                    newGen[i][j][k].state = 1
-                                } else {
-                                    newGen[i][j][k].state = 0
-                                }
-                            }
-                            else {
-                                if (neighbors === 5 || neighbors === 6) {
-                                    newGen[i][j][k].state = 1
-                                } else if(neighbors >= 7 || neighbors <= 4) {
-                                    newGen[i][j][k].state = 0 
-                                }
-                            }
-                            break;
-                        case "Neumann":
-                            neighbors = checkNeighborsN(this.cubeIndex, k, j, i)
-                            if (cell.state === 0) {
-                                if (neighbors === 3) {
-                                    newGen[i][j][k].state = 1
-                                } else {
-                                    newGen[i][j][k].state = 0
-                                }
-                            }
-                            else {
-                                if (neighbors === 2 || neighbors === 3) {
-                                    newGen[i][j][k].state = 1
-                                } else if(neighbors >= 4 || neighbors <= 1) {
-                                    newGen[i][j][k].state = 0 
-                                }
-                            }
-                            break;
-                        default:
-                            neighbors = checkNeighborsM(this.cubeIndex, k, j, i)
-                            
-                    }
-                    
-                    //console.log("neighbors: ", neighbors)
+                    if (this.ruleRef != null) {
+                        switch(this.ruleRef.value){
+                            case "Moore":
+                                neighbors = checkNeighborsM(this.cubeIndex, k, j, i);
 
+                                // GOL rules (slightly tweaked to fit in 3d)
+                                if (cell.state === 0) {
+                                    if (neighbors === 5) {
+                                        newGen[i][j][k].state = 1
+                                    } else {
+                                        newGen[i][j][k].state = 0
+                                    }
+                                }
+                                else {
+                                    if (neighbors === 5 || neighbors === 6) {
+                                        newGen[i][j][k].state = 1
+                                    } else if(neighbors >= 7 || neighbors <= 4) {
+                                        newGen[i][j][k].state = 0 
+                                    }
+                                }
+                                break;
+                            case "Neumann":
+                                neighbors = checkNeighborsN(this.cubeIndex, k, j, i)
+
+                                // GOL rules
+                                if (cell.state === 0) {
+                                    if (neighbors === 3) {
+                                        newGen[i][j][k].state = 1
+                                    } else {
+                                        newGen[i][j][k].state = 0
+                                    }
+                                }
+                                else {
+                                    if (neighbors === 2 || neighbors === 3) {
+                                        newGen[i][j][k].state = 1
+                                    } else if(neighbors >= 4 || neighbors <= 1) {
+                                        newGen[i][j][k].state = 0 
+                                    }
+                                }
+                                break;
+                            default:
+                                neighbors = checkNeighborsM(this.cubeIndex, k, j, i)
+                                
+                        }
+
+                    }
                 }
             }
         }
 
-        //console.log(newGen);
-
         this.cubeIndex = newGen;
-        //this.updateCubes();
         this.populateWorld();
     }
 
@@ -204,13 +178,10 @@ class World extends React.Component {
 
         this.cubeIndex = make3DArray(this.densityRef.value);
         this.drawCubes();
-    
-        //this.updateCubes();
     }
 
     clearScene() {
-        // iterates over each objet every frame and clears them
-        // not the most efficient methif right?
+        // iterates over each object every frame and clears them
         let obj, i;
         for (i = this.scene.children.length - 1; i >= 0 ; i --) {
             obj = this.scene.children[ i ];
@@ -230,17 +201,21 @@ class World extends React.Component {
     render() {
         return (
             <div>
-                <div>
-                    <select ref = {ref => (this.ruleRef = ref)} id="rulesets" name="rulesets" defaultValue = "select" required>
-                        <option value="select" disabled>Select Ruleset</option>
-                        <option value="Moore">GOL- Moore neighborhood</option>
-                        <option value="Neumann">GOL- Neumann neighborhood</option>
-                    </select>
+                <Link to="/" id="back-btn">Back</Link>
 
+                <div id = "input">
+                    <div className = "rule-select">
+                        <select ref = {ref => (this.ruleRef = ref)} id="rulesets" name="rulesets" defaultValue = "select" required>
+                            <option value="select" disabled>Select Ruleset</option>
+                            <option value="Moore">GOL- Moore neighborhood</option>
+                            <option value="Neumann">GOL- Neumann neighborhood</option>
+                        </select>
+                    </div>
+                
                     <input ref = {ref => (this.densityRef = ref)} id = "density" type="number" placeholder="Set Density" required />
                     <button id = "start" onClick={this.start}>Start</button>
                 </div>
-                <button id = "reset" onClick={this.resetWorld}>Reset World</button>
+                
                 <div ref={ref => (this.mount = ref)} />
             </div>
         );

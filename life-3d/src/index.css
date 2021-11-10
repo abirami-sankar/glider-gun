@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css?family=MuseoModerno');
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+
+body {
+  margin: 0;
+
+  background-image: url(images/bg.png);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+}
+
+h1 {
+  text-align: center;
+  color: #ffffff;
+  top: 10%;
+  width: 100vw;
+  position: fixed;
+  font-family: 'MuseoModerno';
+  font-size: 54px;
+  font-weight: 100;
+}
+
+p { 
+  color: #ffffff;               
+  font-family: 'Montserrat';
+  font-size: 14px;
+  font-weight: 100;
+}
+
+footer {
+  width: 100vw;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  top: 720px;
+  position: fixed;
+  font-family: 'Montserrat';
+  font-size: 12px;
+  font-weight: 100;
+}
+
+input, select, option {
+  position: absolute;
+  display: block;
+  z-index: 99;
+}
+
+option {
+  color: #602E54;
+  font-family: 'Montserrat';
+  background-color: #D5B88B;
+}
+
+button {
+  position: fixed;
+  
+  background-color:#D5B88B;
+  color: #602E54;
+
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+
+  text-align: center;
+  text-decoration: none;
+  
+  font-family: 'Montserrat';
+  font-size: 12px;
+  font-weight: 800;
+
+  transition-duration: 0.4s;
+}
+
+button:hover {
+  background-color: rgba(0,0,0,0);
+  border: 2px solid #602E54;
+  color: #D5b88b  ;
+}
+
+#btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#btn {
+  position: fixed;
+  top: 39%;
+  
+  width: 240px;
+
+  background-color:#D5B88B;
+  color: #602E54;
+
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+
+  text-align: center;
+  text-decoration: none;
+  
+  font-family: 'Montserrat';
+  font-size: 14px;
+  font-weight: 800;
+
+  transition-duration: 0.4s;
+}
+
+#card-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#card-ctn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 100px;
+  top: 42%;
+  width: 900px;
+  position: fixed;
+  padding: 40px;          
+}
+
+.body-text {
+  text-align: center;
+  position: fixed;
+  padding: 5px 60px;
+  width: 950px;
+}
+
+.text-box {
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+.card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 30px;
+  background-color: rgba(30, 30, 30, 0.7);
+  border-radius: 25px;
+  margin: 0px 20px;
+}
+
+.card-cptn {
+  text-align: center;
+  color: #ffffff;
+  font-family: 'MuseoModerno';
+  font-weight: 100;
+}
+
+.card-body {
+  color: rgba(250, 250, 250, 0.8);
+  font-size: 12px;
+}
+
+.link {
+  color: #D5B88B;
+  text-align: center;
+  font-family: 'Montserrat';
+  font-weight: 100;
+  font-size: 10px;
+  padding: 5px;
+}
+
+
+#rulesets {
+  left: 10%;
+  top: 6%;
+  width: 240px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid #D5B88B;
+  background-color: rgba(0,0,0,0);
+  color: #D5B88B;
+}
+
+#density {
+  left: 27%;
+  top: 6%;
+  width: 240px;
+  height: 27px;
+  border-radius: 10px;
+  padding-left: 5px;
+  border: 1px solid #D5B88B;
+  background-color: rgba(0,0,0,0);
+  color: #D5B88B;
+}
+
+#start {
+  left: 45%;
+  top: 6%;
+  height: 32px;
+}
+
+#back-btn {
+  left: 3%;
+  top: 6%;
+  
+  position: fixed;
+  display: inline-block;
+
+
+  background-color: none;
+  color: #D5B88B;
+
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+
+  text-align: center;
+  text-decoration: none;
+  
+  font-family: 'Montserrat';
+  font-size: 12px;
+
+  transition-duration: 0.4s;
+}
+
+#back-btn:hover {
+  border: 2px solid #602E54;
+}
+
