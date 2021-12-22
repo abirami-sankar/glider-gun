@@ -11,11 +11,9 @@ class Home extends React.Component {
 
                 <div className = "text-box"> 
                     <p className = "body-text" style = {{top: '25%'}}>
-                        Over the course of two weeks I worked on simulating cellular automata in 3D using React and ThreeJS. I started out by 
-                        first understanding CA in 2d by implementing Game of Life in 2D. The executable file and the source code can be found 
-                        at github.  I wanted to create a simple interactive platform that would allow users to observe a 3D simulation of various 
-                        CA rulesets. The web-app allows users to interact with two variations of Game of Life in 3D and I'll be working 
-                        on adding more options in the future.
+                        Over the course of two weeks I worked on simulating cellular automata in 3D using React and ThreeJS. I wanted to create 
+                        a simple interactive platform that would allow users to observe a 3D simulation of various CA rulesets. The web-app allows
+                        users to interact with two variations of Game of Life in 3D and I'll be working on adding more options in the future.
                     </p>
                 </div>
 
